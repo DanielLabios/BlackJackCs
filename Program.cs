@@ -88,6 +88,14 @@ namespace BlackJackCs
                 }
             }
             deck.deckPosition = 0;
+
+            // Creating the Player & Dealer
+            var dealer = new List<Card>();
+            var player = new List<Card>();
+
+            bool lossCheck;
+            string hitStay;
+
             // Shuffle The Deck
 
             for (int shuffleCount = deck.collection.Count; shuffleCount > 1; shuffleCount--)
@@ -98,9 +106,8 @@ namespace BlackJackCs
                 deck.collection[shuffleCount - 1] = deck.collection[randomNumber];
                 deck.collection[randomNumber] = swapContainer;
             }
+            // Deal 2 Cards to Dealer, then Deal 2 Cards to Player
 
-            var dealer = new List<Card>();
-            var player = new List<Card>();
             dealer.Add(deck.collection[deck.deckPosition]);
             deck.deckPosition++;
             dealer.Add(deck.collection[deck.deckPosition]);
@@ -110,9 +117,10 @@ namespace BlackJackCs
             player.Add(deck.collection[deck.deckPosition]);
             deck.deckPosition++;
             ReadHand(player);
-            bool lossCheck = CheckIfHandValueIsGood(player);
 
-            string hitStay = "Hit";
+            lossCheck = CheckIfHandValueIsGood(player);
+
+            hitStay = "Hit";
             while (lossCheck == true && hitStay == "Hit")
             {
                 Console.WriteLine("Hit or Stay?");
@@ -135,9 +143,26 @@ namespace BlackJackCs
             }
             Console.WriteLine("dealer's hand:");
             ReadHand(dealer);
+            lossCheck = CheckIfHandValueIsGood(dealer);
 
 
-            // sorry game over
+
+            hitStay = "Hit";
+            while (lossCheck == true && hitStay == "Hit")
+            {
+                if (handValue(dealer) < 17)
+                {
+                    dealer.Add(deck.collection[deck.deckPosition]);
+                    deck.deckPosition++;
+                    ReadHand(dealer);
+                    lossCheck = CheckIfHandValueIsGood(player);
+                }
+                else
+                    hitStay = "Stay";
+            }
+
+
+            Console.WriteLine("You reached the end!!");
 
 
 
