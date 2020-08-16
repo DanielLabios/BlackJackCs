@@ -62,9 +62,12 @@ namespace BlackJackCs
 
         }
 
+
         static void Main(string[] args)
         {
+
             // Creating The Deck of Cards
+
             var deck = new Deck();
             for (var indexCount = 0; indexCount < 4; indexCount++)
             {
@@ -90,75 +93,135 @@ namespace BlackJackCs
             deck.deckPosition = 0;
 
             // Creating the Player & Dealer
+
             var dealer = new List<Card>();
             var player = new List<Card>();
-
+            int playerWin = 0;
+            int dealerWin = 0;
             bool lossCheck;
             string hitStay;
+            string keepPlaying = "yes";
 
-            // Shuffle The Deck
+            // Game BlackJack Play Again Loop
 
-            for (int shuffleCount = deck.collection.Count; shuffleCount > 1; shuffleCount--)
+            while (keepPlaying == "yes")
             {
-                var randomNumberGenerator = new Random();
-                var randomNumber = randomNumberGenerator.Next(51);
-                var swapContainer = deck.collection[shuffleCount - 1];
-                deck.collection[shuffleCount - 1] = deck.collection[randomNumber];
-                deck.collection[randomNumber] = swapContainer;
-            }
-            // Deal 2 Cards to Dealer, then Deal 2 Cards to Player
 
-            dealer.Add(deck.collection[deck.deckPosition]);
-            deck.deckPosition++;
-            dealer.Add(deck.collection[deck.deckPosition]);
-            deck.deckPosition++;
-            player.Add(deck.collection[deck.deckPosition]);
-            deck.deckPosition++;
-            player.Add(deck.collection[deck.deckPosition]);
-            deck.deckPosition++;
-            ReadHand(player);
+                // Shuffle The Deck
 
-            lossCheck = CheckIfHandValueIsGood(player);
+                for (int shuffleCount = deck.collection.Count; shuffleCount > 1; shuffleCount--)
+                {
+                    var randomNumberGenerator = new Random();
+                    var randomNumber = randomNumberGenerator.Next(51);
+                    var swapContainer = deck.collection[shuffleCount - 1];
+                    deck.collection[shuffleCount - 1] = deck.collection[randomNumber];
+                    deck.collection[randomNumber] = swapContainer;
+                }
 
-            hitStay = "Hit";
-            while (lossCheck == true && hitStay == "Hit")
-            {
-                Console.WriteLine("Hit or Stay?");
-                hitStay = Console.ReadLine();
+                // Deal 2 Cards to Dealer, then Deal 2 Cards to Player
 
-                while (hitStay != "Hit" && hitStay != "Stay")
+                dealer.Add(deck.collection[deck.deckPosition]);
+                deck.deckPosition++;
+                dealer.Add(deck.collection[deck.deckPosition]);
+                deck.deckPosition++;
+                player.Add(deck.collection[deck.deckPosition]);
+                deck.deckPosition++;
+                player.Add(deck.collection[deck.deckPosition]);
+                deck.deckPosition++;
+                ReadHand(player);
+
+                lossCheck = CheckIfHandValueIsGood(player);
+
+                // Player Hit/Stay Loop
+
+                hitStay = "hit";
+                while (lossCheck == true && hitStay == "hit")
+                {
+                    Console.WriteLine("hit or stay?");
+                    hitStay = Console.ReadLine();
+
+                    while (hitStay != "hit" && hitStay != "stay")
+                    {
+                        Console.WriteLine("Error, input was entered wrong.");
+                        Console.WriteLine("hit or stay?");
+                        hitStay = Console.ReadLine();
+                    }
+                    if (hitStay == "hit")
+                    {
+                        player.Add(deck.collection[deck.deckPosition]);
+                        deck.deckPosition++;
+                        ReadHand(player);
+                        lossCheck = CheckIfHandValueIsGood(player);
+                    }
+
+                }
+
+                // Dealer Reveals Hand
+
+                if (lossCheck == true)
+                {
+                    Console.WriteLine("dealer's hand:");
+                    ReadHand(dealer);
+                    lossCheck = CheckIfHandValueIsGood(dealer);
+                }
+
+                // Dealer Hit/Stay Loop
+
+                hitStay = "Hit";
+                while (lossCheck == true && hitStay == "Hit")
+                {
+                    if (handValue(dealer) < 17)
+                    {
+                        dealer.Add(deck.collection[deck.deckPosition]);
+                        deck.deckPosition++;
+                        ReadHand(dealer);
+                        lossCheck = CheckIfHandValueIsGood(dealer);
+                    }
+                    else
+                        hitStay = "Stay";
+                }
+
+                // Win Determinator
+
+                if (handValue(player) > 21)
+                {
+                    Console.WriteLine("No Bueno, you lose");
+                    dealerWin++;
+                }
+                else if (handValue(player) < 21 && handValue(player) < handValue(dealer) && handValue(dealer) <= 21)
+                {
+                    Console.WriteLine("No Bueno, you lose2");
+                    dealerWin++;
+                }
+                else if (handValue(player) > handValue(dealer))
+                {
+
+                    Console.WriteLine("Congratulations! You Win!");
+                    playerWin++;
+                }
+                else if (handValue(dealer) > 21)
+                {
+
+                    Console.WriteLine("Congratz! You win!");
+                    playerWin++;
+                }
+
+
+                Console.WriteLine("Play again? yes/no");
+                keepPlaying = Console.ReadLine();
+                while (keepPlaying != "yes" && keepPlaying != "no")
                 {
                     Console.WriteLine("Error, input was entered wrong.");
-                    Console.WriteLine("Hit or Stay?");
-                    hitStay = Console.ReadLine();
+                    Console.WriteLine("Play again? yes/no");
+                    keepPlaying = Console.ReadLine();
                 }
-                if (hitStay == "Hit")
-                {
-                    player.Add(deck.collection[deck.deckPosition]);
-                    deck.deckPosition++;
-                    ReadHand(player);
-                    lossCheck = CheckIfHandValueIsGood(player);
-                }
+                deck.deckPosition = 0;
+                player.Clear();
+                dealer.Clear();
 
-            }
-            Console.WriteLine("dealer's hand:");
-            ReadHand(dealer);
-            lossCheck = CheckIfHandValueIsGood(dealer);
+                Console.WriteLine($"Player Wins: {playerWin}");
+                Console.WriteLine($"Dealer Wins: {dealerWin}");
 
-
-
-            hitStay = "Hit";
-            while (lossCheck == true && hitStay == "Hit")
-            {
-                if (handValue(dealer) < 17)
-                {
-                    dealer.Add(deck.collection[deck.deckPosition]);
-                    deck.deckPosition++;
-                    ReadHand(dealer);
-                    lossCheck = CheckIfHandValueIsGood(player);
-                }
-                else
-                    hitStay = "Stay";
             }
 
 
