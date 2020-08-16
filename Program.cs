@@ -9,22 +9,11 @@ namespace BlackJackCs
         public string rank { get; set; }
         public int cardValue { get; set; }
     }
-
-    /* class Hand
-     {
-         public List<Card> collection { get; set; }
-         public int handValue()
-         {
-             int counter = 0;
-             int sum = 0;
-             foreach (Card card in collection)
-             {
-                 sum = sum + collection[counter].cardValue;
-                 counter++;
-             }
-             return sum;
-         }
-     }*/
+    class Deck
+    {
+        public List<Card> collection = new List<Card>();
+        public int deckPosition { get; set; }
+    }
     class Program
     {
         static int GiveValue(int rank)
@@ -40,21 +29,43 @@ namespace BlackJackCs
             else
                 return rank + 1;
         }
-        static List<Card> Deal(List<Card> Hand, List<Card> Deck)
+        static int handValue(List<Card> player)
         {
-            var dealt = new List<Card>();
-            dealt = Hand;
-            dealt.Add(Deck[0]);
-            return dealt;
+            int counter = 0;
+            int sum = 0;
+            foreach (Card card in player)
+            {
+                sum = sum + player[counter].cardValue;
+                counter++;
+            }
+            return sum;
+        }
+        static bool CheckIfHandValueIsGood(List<Card> player2)
+        {
+            int sum = handValue(player2);
+            if (sum > 21)
+            {
+                return false;
+            }
+            else
+                return true;
+        }
+        static void ReadHand(List<Card> player3)
+        {
+            int handCount = 0;
+            foreach (Card card in player3)
+            {
+                Console.WriteLine($"{player3[handCount].rank} of {player3[handCount].suite}");
+                handCount++;
+            }
+            Console.WriteLine(handValue(player3));
 
         }
 
         static void Main(string[] args)
         {
-
             // Creating The Deck of Cards
-
-            var deck = new List<Card>();
+            var deck = new Deck();
             for (var indexCount = 0; indexCount < 4; indexCount++)
             {
                 var suite = new List<string> { "Diamonds", "Spades", "Hearts", "Clubs" };
@@ -73,30 +84,61 @@ namespace BlackJackCs
                         rank = rank[suiteSetCounter],
                         cardValue = GiveValue(suiteSetCounter),
                     };
-                    deck.Add(newCard);
+                    deck.collection.Add(newCard);
                 }
             }
+            deck.deckPosition = 0;
             // Shuffle The Deck
 
-            for (int shuffleCount = deck.Count; shuffleCount > 1; shuffleCount--)
+            for (int shuffleCount = deck.collection.Count; shuffleCount > 1; shuffleCount--)
             {
                 var randomNumberGenerator = new Random();
                 var randomNumber = randomNumberGenerator.Next(51);
-                var swapContainer = deck[shuffleCount - 1];
-                deck[shuffleCount - 1] = deck[randomNumber];
-                deck[randomNumber] = swapContainer;
+                var swapContainer = deck.collection[shuffleCount - 1];
+                deck.collection[shuffleCount - 1] = deck.collection[randomNumber];
+                deck.collection[randomNumber] = swapContainer;
             }
 
             var dealer = new List<Card>();
             var player = new List<Card>();
-            dealer = Deal(dealer, deck);
-            dealer = Deal(dealer, deck);
+            dealer.Add(deck.collection[deck.deckPosition]);
+            deck.deckPosition++;
+            dealer.Add(deck.collection[deck.deckPosition]);
+            deck.deckPosition++;
+            player.Add(deck.collection[deck.deckPosition]);
+            deck.deckPosition++;
+            player.Add(deck.collection[deck.deckPosition]);
+            deck.deckPosition++;
+            ReadHand(player);
+            bool lossCheck = CheckIfHandValueIsGood(player);
+
+            string hitStay = "Hit";
+            while (lossCheck == true && hitStay == "Hit")
+            {
+                Console.WriteLine("Hit or Stay?");
+                hitStay = Console.ReadLine();
+
+                while (hitStay != "Hit" && hitStay != "Stay")
+                {
+                    Console.WriteLine("Error, input was entered wrong.");
+                    Console.WriteLine("Hit or Stay?");
+                    hitStay = Console.ReadLine();
+                }
+                if (hitStay == "Hit")
+                {
+                    player.Add(deck.collection[deck.deckPosition]);
+                    deck.deckPosition++;
+                    ReadHand(player);
+                    lossCheck = CheckIfHandValueIsGood(player);
+                }
+
+            }
+            Console.WriteLine("dealer's hand:");
+            ReadHand(dealer);
 
 
+            // sorry game over
 
-            Console.WriteLine($"{dealer[0].rank} of {dealer[0].suite}");
-            Console.WriteLine($"{dealer[1].rank} of {dealer[1].suite}");
-            //Console.WriteLine(dealer.handValue());
 
 
 
