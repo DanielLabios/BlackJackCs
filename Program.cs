@@ -29,13 +29,13 @@ namespace BlackJackCs
             else
                 return rank + 1;
         }
-        static int handValue(List<Card> player)
+        static int handValue(List<Card> player5)
         {
             int counter = 0;
             int sum = 0;
-            foreach (Card card in player)
+            foreach (Card card in player5)
             {
-                sum = sum + player[counter].cardValue;
+                sum = sum + player5[counter].cardValue;
                 counter++;
             }
             return sum;
@@ -53,16 +53,73 @@ namespace BlackJackCs
         static void ReadHand(List<Card> player3)
         {
             int handCount = 0;
+            Console.WriteLine($"--------{player3}'s hand---------");
             foreach (Card card in player3)
             {
-                Console.WriteLine($"{player3[handCount].rank} of {player3[handCount].suite}");
+                Console.WriteLine($"{handCount + 1}. {player3[handCount].rank} of {player3[handCount].suite}");
                 handCount++;
             }
-            Console.WriteLine(handValue(player3));
-
+            Console.WriteLine($"Score: {handValue(player3)}");
+            Console.WriteLine("------------------------------");
+            System.Threading.Thread.Sleep(2500);
         }
-
-
+        static void PlayIntro()
+        {
+            Console.WriteLine("|||||||||||||||||||||||||||||||||||||||||||||||");
+            Console.WriteLine("                                               ");
+            Console.WriteLine("            Let's Play BlackJack               ");
+            Console.WriteLine("                                               ");
+            Console.WriteLine("|||||||||||||||||||||||||||||||||||||||||||||||");
+            System.Threading.Thread.Sleep(2500);
+            Console.WriteLine("Initializing.....");
+            System.Threading.Thread.Sleep(2500);
+            Console.Write("Player 1 is Ready,");
+            System.Threading.Thread.Sleep(1000);
+            Console.WriteLine("   GoodLuck!");
+            System.Threading.Thread.Sleep(1000);
+        }
+        static void PlayShuffleSounds()
+        {
+            Console.Write("SSSCCHHHHHHHHPP!! SSSCCHHHHHHHHPPP!!");
+            System.Threading.Thread.Sleep(1000);
+            Console.WriteLine("   Deck has been shuffled.");
+            System.Threading.Thread.Sleep(1000);
+        }
+        static void PlayInitialDeal()
+        {
+            Console.Write("Flip!, ");
+            System.Threading.Thread.Sleep(500);
+            Console.Write("Flip!, ");
+            System.Threading.Thread.Sleep(500);
+            Console.Write("Flip!, ");
+            System.Threading.Thread.Sleep(500);
+            Console.WriteLine("Flip!, ");
+            System.Threading.Thread.Sleep(1000);
+            Console.WriteLine("Cards have been dealt.");
+            System.Threading.Thread.Sleep(2500);
+        }
+        static void DisplayScores(int wins, int loses)
+        {
+            System.Threading.Thread.Sleep(1000);
+            Console.WriteLine("----------Score----------");
+            Console.WriteLine($"Player Wins: {wins}");
+            Console.WriteLine($"Dealer Wins: {loses}");
+            System.Threading.Thread.Sleep(2500);
+        }
+        static void PlaySendOff(int wins, int loses)
+        {
+            System.Threading.Thread.Sleep(1000);
+            Console.WriteLine("------Final Score------");
+            System.Threading.Thread.Sleep(1000);
+            Console.WriteLine($"Player Wins: {wins}");
+            System.Threading.Thread.Sleep(1000);
+            Console.WriteLine($"Dealer Wins: {loses}");
+            System.Threading.Thread.Sleep(1000);
+            Console.WriteLine("-----------------------");
+            Console.WriteLine("Thank You For Playing!!");
+            Console.WriteLine("-----------------------");
+            System.Threading.Thread.Sleep(2500);
+        }
         static void Main(string[] args)
         {
 
@@ -92,7 +149,7 @@ namespace BlackJackCs
             }
             deck.deckPosition = 0;
 
-            // Creating the Player & Dealer
+            // Creating the Player, Dealer, & Important Tracker Variables
 
             var dealer = new List<Card>();
             var player = new List<Card>();
@@ -102,13 +159,15 @@ namespace BlackJackCs
             string hitStay;
             string keepPlaying = "yes";
 
-            // Game BlackJack Play Again Loop
+            // Starting the Game
 
+            PlayIntro();
             while (keepPlaying == "yes")
             {
 
                 // Shuffle The Deck
 
+                PlayShuffleSounds();
                 for (int shuffleCount = deck.collection.Count; shuffleCount > 1; shuffleCount--)
                 {
                     var randomNumberGenerator = new Random();
@@ -143,89 +202,107 @@ namespace BlackJackCs
                     while (hitStay != "hit" && hitStay != "stay")
                     {
                         Console.WriteLine("Error, input was entered wrong.");
+                        System.Threading.Thread.Sleep(1000);
                         Console.WriteLine("hit or stay?");
                         hitStay = Console.ReadLine();
                     }
                     if (hitStay == "hit")
                     {
+                        Console.WriteLine("Flip! New Card!");
+                        System.Threading.Thread.Sleep(1000);
                         player.Add(deck.collection[deck.deckPosition]);
                         deck.deckPosition++;
                         ReadHand(player);
                         lossCheck = CheckIfHandValueIsGood(player);
                     }
-
                 }
 
                 // Dealer Reveals Hand
 
                 if (lossCheck == true)
                 {
-                    Console.WriteLine("dealer's hand:");
+                    System.Threading.Thread.Sleep(1000);
+                    Console.WriteLine("Dealer reveals his hand!!");
+                    System.Threading.Thread.Sleep(1000);
                     ReadHand(dealer);
                     lossCheck = CheckIfHandValueIsGood(dealer);
                 }
 
                 // Dealer Hit/Stay Loop
 
-                hitStay = "Hit";
-                while (lossCheck == true && hitStay == "Hit")
+                hitStay = "hit";
+                while (lossCheck == true && hitStay == "hit")
                 {
-                    if (handValue(dealer) < 17)
+                    if (handValue(dealer) < 17 && handValue(dealer) <= handValue(player))
                     {
+                        Console.Write("Flip!");
+                        System.Threading.Thread.Sleep(1000);
+                        Console.WriteLine("   Dealer gives himself another card.");
+                        System.Threading.Thread.Sleep(1000);
+
                         dealer.Add(deck.collection[deck.deckPosition]);
                         deck.deckPosition++;
                         ReadHand(dealer);
                         lossCheck = CheckIfHandValueIsGood(dealer);
                     }
                     else
-                        hitStay = "Stay";
+                        hitStay = "stay";
                 }
 
                 // Win Determinator
 
                 if (handValue(player) > 21)
                 {
-                    Console.WriteLine("No Bueno, you lose");
+                    Console.WriteLine("Oh no! Your score is more than 21!");
+                    System.Threading.Thread.Sleep(1000);
+                    Console.WriteLine("You Lose...");
                     dealerWin++;
                 }
-                else if (handValue(player) < 21 && handValue(player) < handValue(dealer) && handValue(dealer) <= 21)
+                else if (handValue(player) <= 21 && handValue(player) <= handValue(dealer) && handValue(dealer) <= 21)
                 {
-                    Console.WriteLine("No Bueno, you lose2");
+                    Console.WriteLine("Oh no! The Dealer has the better hand...");
+                    System.Threading.Thread.Sleep(1000);
+                    Console.WriteLine("You Lose...");
                     dealerWin++;
                 }
                 else if (handValue(player) > handValue(dealer))
                 {
-
-                    Console.WriteLine("Congratulations! You Win!");
+                    Console.WriteLine("You have the better hand!");
+                    System.Threading.Thread.Sleep(1000);
+                    Console.WriteLine("You beat the Dealer!");
                     playerWin++;
                 }
                 else if (handValue(dealer) > 21)
                 {
-
-                    Console.WriteLine("Congratz! You win!");
+                    Console.WriteLine("Oh no! The Dealer went over 21!");
+                    System.Threading.Thread.Sleep(1000);
+                    Console.WriteLine("You beat the Dealer!");
                     playerWin++;
                 }
 
+                // Play Again Prompt
 
+                DisplayScores(playerWin, dealerWin);
                 Console.WriteLine("Play again? yes/no");
                 keepPlaying = Console.ReadLine();
                 while (keepPlaying != "yes" && keepPlaying != "no")
                 {
                     Console.WriteLine("Error, input was entered wrong.");
+                    System.Threading.Thread.Sleep(2500);
                     Console.WriteLine("Play again? yes/no");
                     keepPlaying = Console.ReadLine();
                 }
+
+                // Reset Cards
+
                 deck.deckPosition = 0;
                 player.Clear();
                 dealer.Clear();
-
-                Console.WriteLine($"Player Wins: {playerWin}");
-                Console.WriteLine($"Dealer Wins: {dealerWin}");
-
             }
 
+            // Send Off
 
-            Console.WriteLine("You reached the end!!");
+            PlaySendOff(playerWin, dealerWin);
 
 
 
@@ -240,10 +317,10 @@ namespace BlackJackCs
 
             /*/Checking Deck of Cards (To see if it is correct)
             int cardCount = 0;
-            foreach (Card card in deck)
+            foreach (Card card in deck.collection)
             {
-                Console.WriteLine($"{deck[cardCount].rank} of {deck[cardCount].suite}");
-                Console.WriteLine(deck[cardCount].cardValue);
+                Console.WriteLine($"{deck.collection[cardCount].rank} of {deck.collection[cardCount].suite}");
+                Console.WriteLine(deck.collection[cardCount].cardValue);
                 cardCount++;
                 }*/
         }
